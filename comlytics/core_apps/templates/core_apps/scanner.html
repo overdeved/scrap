@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+{% extends 'core_apps/base.html' %}
+
+        {% block content %}
+
+    <form action="{% url 'scanner' %}" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" value="Submit">Submit</button>
+    </form>
+
+<h1>Search Results</h1>
+    <p>for: {{ keyword }}</p>
+    <p>Number of listings: {{ found_offers }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Lisitng ID</th>
+                <th>Listing EAN</th>
+                <th>Listing Title</th>
+                <th>Promoted</th>
+                <th>Price</th>
+                <th>Units Sold</th>
+                <th>Sales Value</th>
+                <th>Rating</th>
+                <th>Rating Count</th>
+                <th>Is Smart</th>
+                <th>Best Price Guarantee</th>
+                <th>Seller</th>
+                <th>Seller Feedback</th>
+                <th>Is SuperSeller</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in search_result %}
+
+            <tr>
+            <td><a href="{{ product.item_url }}">{{ product.item_id }}</a></td>
+            <td>{{ product.item_ean }}</td>
+            <td>{{ product.item_title }}</td>
+            <td>{{ product.item_promoted }}</td>
+            <td>{{ product.item_price }}</td>
+            <td>{{ product.item_units_sold }}</td>
+            <td>{{ product.item_sales_value }}</td>
+            <td>{{ product.item_rating }}</td>
+            <td>{{ product.item_rating_count }}</td>
+            <td>{{ product.item_isSmart }}</td>
+            <td>{{ product.item_best_price_guarantee }}</td>
+            <td>{{ product.seller_name }}</td>
+            <td>{{ product.seller_feedback }}</td>
+            <td>{{ product.seller_supperSeller }}</td>
+            </tr>
+                {% endfor %}
+        {% endblock %}
+        </tbody>
+    </table>
+
+{% include 'core_apps/footer.html' %}
+
+
+
+
+</body>
+</html>
