@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from decimal import Decimal
 from django.db import models
-from .models import SearchResult, SearchQuery
+from .models import SearchQuery, SearchResult
 
 
 
@@ -31,7 +31,7 @@ def get_url(search_conditions, keyword, i):
     return url, file_keyword
 
 
-def get_page(url, headers, cookies):
+def get_page(url, headers, proxies, cookies):
     url, _ = url
     page = requests.get(url, headers=headers, cookies=cookies)
     return page.content
@@ -212,6 +212,11 @@ def write_to_db(json_object, file_keyword):
 def engine(keyword, pages):
     keyword = keyword
     pages = pages
+    proxies = {
+        'http': 'http://192.168.100.79:3128',
+        'https': 'http://192.168.100.79:3128',
+        'ftp': 'http://192.168.100.79:3128',
+    }
     headers = {
         "Accept": "*",
         "Accept-Encoding": "gzip, deflate, br",
@@ -227,20 +232,21 @@ def engine(keyword, pages):
     }
     current_timestamp_ms = int(time.time() * 1000)
     cookie_str = f'_cmuid=16940c14-35a0-4a73-9669-6572793e1a03; __gfp_64b=Dz4VKy.VC81lf3vJK5YSMqSZJ7h7nlA_NZ3UC0g74Yn.q7|1697922123; _tt_enable_cookie=1; _ttp=MqD4fOEVx2KUrQXgCJ036lXcq_4; gdpr_permission_given=0; ws3=LFvDveTqPjc0L05XT3YXkeQi9sR1AK693; _ga=GA1.2.615150404.1689538717; _ga_G64531DSC4=GS1.1.1703615804.12.0.1703615804.60.0.0; QXLSESSID=5e7e94f7b17ac17a650fadc8d45dccd89bd23ffc030b7b//02; parcelsChecksum=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855; _gcl_au=1.1.2121870168.1707047691; __gads=ID=b4a6872f7cf0c1b0:T=1702150697:RT=1707058714:S=ALNI_MaJbQN95JF6qoca9NrtiHKdDvZK7w; __gpi=UID=00000d11057c7d03:T=1702150697:RT=1707058715:S=ALNI_MbqSLV_g8UynFHu7mRL7aPuUENOwg; __eoi=ID=46af5c4b8a69fcf5:T=1706864915:RT=1707058715:S=AA-AfjYxPsrsUVpkFssB-Z3SS4m1; wdctx=v4.cvYVsw4ANywwFiEPdeqM6zEfkIZy0INVpRc-hs44KtZl6AsExTEV_QzGoxh3MKHNPp5zuMAQwCuAJR4WsN3cvlA1j3Z8vXmwQgWB4K7zI4lhyRDoijkchOSAnWlQo2z7zM1vLWXJhBMfP1yR5OgrS_AuS0HT0p3llNncejyv9o0MUlkj4m4Q1CacNnqqIkM-swJ_PPT1lcvPBy6sOsYoJe7PM0ziUAwDMChyyeSOrMfl-WGOXSOS4fIneN4; datadome=o3YeheMDwy13x8Zc_b7oxnsvRYia9aT4P2re4ndn3P9yofbsrk4voLZRsM00RFCF52WZ7azt2kjdrxVg2kNLo49UssgLvby2umKfdRppKw4Ys2FS71v6E_JPj6WtFcm9'
-    #cookie_str = f"; wdctx=v4.Rmm5-e5ZubyrvwgipjB6hpto2izKOJnw9ZLdYD3TXGtCWo5uKgdh_WAzQn9txCXVXbg_ESYc8h6VjDFYF7ecp42yneqX3APgUHZuBvR4VcKGCcHBI_T4n4txYfBhuCrXKiaINt_1tWWgIf6I89kyVVA3uospE6xuwj_CmA1U4QdQM0hXP9Zd8hJipO0zMRQcDW0J7RJI0CZmNJj-DESXyq3bPpRqSAJBqUtgGVu9U985RXPA9jpf_yXTeA; gdpr_permission_given=0; __gads=ID=eb6da4d027994280:T=1708427286:RT=1708427286:S=ALNI_MY1bNInqyrV-M8lwL1gyMAlDkMC0A; __gpi=UID=00000d5ddefcf664:T=1708427286:RT=1708427286:S=ALNI_Mais4dDyb87M-ETSOzcteqGynU4gg; __eoi=ID=45b1e375607ca9b8:T=1708427286:RT=1708427286:S=AA-AfjbRThKoP3ZXQxTrwsaXZaR8; datadome=DWE9F5RoZKKFHTWo_kxQOeZXMmVSEtqC6oK7lCQYRUtae0~yMG1VXuJfWgF1RR0kd7rrOyLjIcCw4EQbDE4hv0TJ4vvfPgVlfSWo6AbNb8n1GHeiV~lKm3Ry_4NdihTD"
+    cookie_str = f"; wdctx=v4.Rmm5-e5ZubyrvwgipjB6hpto2izKOJnw9ZLdYD3TXGtCWo5uKgdh_WAzQn9txCXVXbg_ESYc8h6VjDFYF7ecp42yneqX3APgUHZuBvR4VcKGCcHBI_T4n4txYfBhuCrXKiaINt_1tWWgIf6I89kyVVA3uospE6xuwj_CmA1U4QdQM0hXP9Zd8hJipO0zMRQcDW0J7RJI0CZmNJj-DESXyq3bPpRqSAJBqUtgGVu9U985RXPA9jpf_yXTeA; gdpr_permission_given=0; __gads=ID=eb6da4d027994280:T=1708427286:RT=1708427286:S=ALNI_MY1bNInqyrV-M8lwL1gyMAlDkMC0A; __gpi=UID=00000d5ddefcf664:T=1708427286:RT=1708427286:S=ALNI_Mais4dDyb87M-ETSOzcteqGynU4gg; __eoi=ID=45b1e375607ca9b8:T=1708427286:RT=1708427286:S=AA-AfjbRThKoP3ZXQxTrwsaXZaR8; datadome=DWE9F5RoZKKFHTWo_kxQOeZXMmVSEtqC6oK7lCQYRUtae0~yMG1VXuJfWgF1RR0kd7rrOyLjIcCw4EQbDE4hv0TJ4vvfPgVlfSWo6AbNb8n1GHeiV~lKm3Ry_4NdihTD"
     cookies = {cookie.split("=")[0]: cookie.split("=")[1] for cookie in cookie_str.split("; ")}
     conditions = search_conditions()
     products_on_pages = list()
     for i in range(1, pages+1):
             url = get_url(conditions, keyword, i)
-            page_content = get_page(url, headers, cookies,)
+            page_content = get_page(url, headers, proxies, cookies,)
             json_content = get_json(page_content)
-            make_file = write_to_csv(json_content, url)
+
             products_on_pages.append(json_content)
             print(len(products_on_pages))
             time.sleep(2.64)
 
     update_database = write_to_db(products_on_pages, url)
+    #make_file = write_to_csv(json_content, url)
 
 
 
